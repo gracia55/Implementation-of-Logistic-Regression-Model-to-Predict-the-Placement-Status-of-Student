@@ -17,11 +17,11 @@ Calculate the accuracy, confusion and classification report by importing the req
 Apply new unknown values
 
 # Program:
-
+```
 /*
 Program to implement the the Logistic Regression Model to Predict the Placement Status of Student.
-Developed by: Agalya R
-RegisterNumber:  212222040003
+Developed by: Gracia Ravi
+RegisterNumber:  212222040047
 */
 import pandas as pd
 data=pd.read_csv('/Placement_Data(1).csv')
@@ -76,7 +76,7 @@ classification_report1 = classification_report(y_test,y_pred)
 print(classification_report1)
 
 lr.predict([[1,80,1,90,1,1,90,1,0,85,1,85]])
-
+```
 # Output:
 # Placement data
 ![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/7bdc3810-5c9b-4a4f-ad22-29d8dffc83a5)
