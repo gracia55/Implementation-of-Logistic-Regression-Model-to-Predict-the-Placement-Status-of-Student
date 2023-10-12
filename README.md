@@ -1,134 +1,140 @@
-# Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student
+# Implementation-of-Linear-Regression-Using-Gradient-Descent
+# AIM:
 
-## AIM:
-To write a program to implement the the Logistic Regression Model to Predict the Placement Status of Student.
+To write a program to predict the profit of a city using the linear regression model with gradient descent.
 # Equipments Required:
-1. Hardware – PCs
-2. Anaconda – Python 3.7 Installation / Jupyter notebook
+
+    1. Hardware – PCs
+    2. Anaconda – Python 3.7 Installation / Jupyter notebook
 
 # Algorithm
 
-1. Import the standard libraries.
-2. Upload the dataset and check for any null or duplicated values using .isnull() and .duplicated() function respectively.
-3. LabelEncoder and encode the dataset.
-4. Import LogisticRegression from sklearn and apply the model on the dataset.
-5. Predict the values of array.
-6. Calculate the accuracy, confusion and classification report by importing the required modules from sklearn.
-7. Apply new unknown values
+    1. Import the required library and read the dataframe.
 
-# Program:
+    2. Write a function computeCost to generate the cost function.
+
+    3. Perform iterations og gradient steps with learning rate.
+
+    4. Plot the Cost function using Gradient Descent and generate the required graph.
+
+#  Program:
 ```
 /*
-Program to implement the the Logistic Regression Model to Predict the Placement Status of Student.
+Program to implement the linear regression using gradient descent.
 Developed by: Gracia Ravi
 RegisterNumber:  212222040047
 */
+import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
-data=pd.read_csv('/Placement_Data(1).csv')
-data.head()
+data=pd.read_csv("/content/ex1.txt",header = None)
 
-data1=data.copy()
-data1=data1.drop(["sl_no","salary"],axis=1)
-data1.head()
+plt.scatter(data[0],data[1])
+plt.xticks(np.arange(5,30,step=5))
+plt.yticks(np.arange(-5,30,step=5))
+plt.xlabel("Population of City(10,000s)")
+plt.ylabel("Profit ($10,000)")
+plt.title("Profit Prediction")
 
-data1.isnull().sum()
+def computeCost(X,y,theta):
+  """
+  Take in a numpy array X,y,theta and generate the cost function of using the in a linear regression model
+  """
+  m=len(y) # length of the training data
+  h=X.dot(theta) #hypothesis
+  square_err=(h-y)**2
 
-data1.duplicated().sum()
+  return 1/(2*m) * np.sum(square_err) #returning J
 
-from sklearn.preprocessing import LabelEncoder
-le=LabelEncoder()
-data1["gender"] = le.fit_transform(data1["gender"])
-data1["ssc_b"] = le.fit_transform(data1["ssc_b"])
-data1["hsc_b"] = le.fit_transform(data1["hsc_b"])
-data1["hsc_s"] = le.fit_transform(data1["hsc_s"])
-data1["degree_t"] = le.fit_transform(data1["degree_t"])
-data1["workex"] = le.fit_transform(data1["workex"])
-data1["specialisation"] = le.fit_transform(data1["specialisation"])
-data1["status"] = le.fit_transform(data1["status"])
-data1
+data_n=data.values
+m=data_n[:,0].size
+X=np.append(np.ones((m,1)),data_n[:,0].reshape(m,1),axis=1)
+y=data_n[:,1].reshape(m,1)
+theta=np.zeros((2,1))
+computeCost(X,y,theta) #Call the function
 
-x=data1.iloc[:,:-1]
-x
+from matplotlib.container import ErrorbarContainer
+from IPython.core.interactiveshell import error
+def gradientDescent(X,y,theta,alpha,num_iters):
+    """
+    Take the numpy array X,y,theta and update theta by taking the num_tiers gradient with learning rate of alpha
 
-y=data1["status"]
-y
+    return theta and the list of the cost of theta during each iteration
+    """
 
-from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=0)
+    m=len(y)
+    J_history=[]
 
-from sklearn.linear_model import LogisticRegression
-lr=LogisticRegression(solver = "liblinear")
-lr.fit(x_train,y_train)
-y_pred=lr.predict(x_test)
-y_pred
+    for i in range(num_iters):
+      predictions=X.dot(theta)
+      error=np.dot(X.transpose(),(predictions -y))
+      descent=alpha *1/m*error
+      theta-=descent
+      J_history.append(computeCost(X,y,theta))
 
-from sklearn.metrics import accuracy_score
-accuracy= accuracy_score(y_test,y_pred)#Accuracy Score = (TP+TN)/(TP+FN+TN+FP)
-#accuracy_score(y_true,y_pred,normalize=False)
-accuracy
+    return theta,J_history
 
-from sklearn.metrics import confusion_matrix
-confusion = confusion_matrix(y_test,y_pred)
-confusion #11+24=35 -correct predictions,5+3=8 incorrect predictions
+theta,J_history = gradientDescent(X,y,theta,0.01,1500)
+print("h(x)="+str(round(theta[0,0],2))+"+"+str(round(theta[1,0],2))+"x1")
 
-from sklearn.metrics import classification_report
-classification_report1 = classification_report(y_test,y_pred)
-print(classification_report1)
+#Testing the implementation
+plt.plot(J_history)
+plt.xlabel("Iteration")
+plt.ylabel("$J(\Theta)$")
+plt.title("Cost function using Gradient Descent")
 
-lr.predict([[1,80,1,90,1,1,90,1,0,85,1,85]])
+
+plt.scatter(data[0],data[1])
+x_value=[x for x in range(25)]
+y_value=[y*theta[1]+theta[0] for y in x_value]
+plt.plot(x_value,y_value,color="r")
+plt.xticks(np.arange(5,30,step=5))
+plt.yticks(np.arange(-5,30,step=5))
+plt.xlabel("Population of City (10,000s)")
+plt.ylabel("Profit($10,000")
+plt.title("Profit Prediction")
+
+def predict(x,theta):
+  """
+  Tkes in numpy array of x and theta and return the predicted value of y base
+  """
+
+  predictions=np.dot(theta.transpose(),x)
+
+  return predictions[0]
+
+predict1=predict(np.array([1,3.5]),theta)*10000
+print("For population =35,000, we predict a profit of $"+str(round(predict1,0)))
+
+predict2=predict(np.array([1,7]),theta)*10000
+print("For population = 70,000, we predict a profit of $"+str(round(predict2,0)))
 ```
+
 # Output:
-# Placement data
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/7bdc3810-5c9b-4a4f-ad22-29d8dffc83a5)
+Profit Prediction Graph
+
+![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/9ca42674-58ea-4292-afb1-b76d921cd59c)
 
 
-# Salary data
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/b312edac-7a9d-47a4-98e6-c8c7cacc598e)
+![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/6fca8651-3244-4b62-a8da-fd3819bfd223)
+
+# Compute Cost Value
+![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/6b714283-f116-4254-827e-a7344b7bebeb)
 
 
-# Checking the null() function
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/ae7d4f72-fe46-4eda-a7f6-96a37841746f)
+# h(x) Value
+![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/bdbfd2be-2f77-4073-9312-c6f130613bd8)
+
+# Cost function using Gradient Descent Graph
+![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/28e6e969-264b-4fde-81a7-66fc36b008e1)
 
 
-# Data Duplicate
-
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/cd7e7953-53cc-4952-bc29-79680c1b4ca7)
-
-
-# Print data
-
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/075652d2-6bc5-4807-bb3a-4f94047483e5)
+# Profit for the Population 35,000
+![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/45ab4ae1-9e23-4376-b579-5c4ff2773c20)
 
 
-# Data-status
+# Profit for Population 70,000
+![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/0bd103bd-8077-4c5a-9bb1-d8a25d7e365c)
 
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/c58a55c8-df7d-4e32-ba69-c99222e4c382)
-
-
-# y_prediction array
-
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/f1fb11c0-0da8-4e3d-9489-724fff8ca44e)
-
-
-# Accuracy value
-
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/db9af4c2-95ff-4513-aef6-6dd11766505e)
-
-
-# Confusion array
-
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/a2222a19-b841-426e-a176-853eb0d163dd)
-
-
-# Classification report
-
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/2bddc10b-08c6-451b-82f3-f7e0b82f3102)
-
-
-# Prediction of LR
-
-![image](https://github.com/gracia55/Implementation-of-Logistic-Regression-Model-to-Predict-the-Placement-Status-of-Student/assets/129026838/3f17ccb6-2da7-4ab7-849e-edfcca3d3d20)
-
-
-#  Result:
-Thus the program to implement the the Logistic Regression Model to Predict the Placement Status of Student is written and verified using python programming.
+# Result:
+Thus the program to implement the linear regression using gradient descent is written and verified using python programming.
